@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Decision Console — Director of Human Capital</title>
+<style>
+:root{
+  --navy:#0A2540; --navy2:#123A5E; --ink:#0F2233; --muted:#5C6E7E; --faint:#8899A6;
+  --line:#DCE4EC; --line2:#EDF2F6; --bg:#FFFFFF; --bg2:#F6F9FB; --bg3:#EEF3F7;
+  --teal:#0E7C86; --tealS:#E2F1F2; --blue:#2C6FA8; --blueS:#E9F1F8;
+  --green:#2C7A58; --greenS:#E4F1EB; --amber:#A96C16; --amberS:#FBF1E0;
+  --red:#AE3A2B; --redS:#FAEBE8;
+  --shell:#0C1B29; --shell2:#122943; --shellLine:rgba(255,255,255,.09); --shellTxt:#B7C7D4; --shellTxtDim:#7590A3;
+  --hsans:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --bsans:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --radius:8px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--bg2);font-family:var(--bsans);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#C7D3DB;border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+
+#app{display:flex;height:100vh;height:100dvh}
+
+/* ---------------- Sidebar ---------------- */
+#side{flex:0 0 244px;background:var(--shell);color:var(--shellTxt);display:flex;flex-direction:column;overflow-y:auto}
+.brand{padding:18px 18px 14px;border-bottom:1px solid var(--shellLine)}
+.brand .k{font-size:9.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--teal)}
+.brand .n{font-size:15px;font-weight:700;color:#fff;margin-top:5px;letter-spacing:-.2px;line-height:1.25}
+.brand .u{font-size:10.5px;color:var(--shellTxtDim);margin-top:6px;line-height:1.4}
+.navwrap{padding:12px 10px;flex:1 1 auto}
+.navlabel{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--shellTxtDim);padding:10px 10px 6px}
+.navitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:12.5px;color:var(--shellTxt);margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
+.navitem:hover{background:rgba(255,255,255,.06);color:#fff}
+.navitem.active{background:var(--teal);color:#fff;font-weight:600}
+.navitem .ix{flex:0 0 18px;font-size:10px;font-weight:700;opacity:.6;font-variant-numeric:tabular-nums}
+.navitem.active .ix{opacity:.9}
+.navitem .dotstate{flex:0 0 6px;height:6px;width:6px;border-radius:50%;background:var(--shellTxtDim);margin-left:auto}
+.navitem.done .dotstate{background:var(--green)}
+.sidefoot{padding:12px 18px 16px;border-top:1px solid var(--shellLine);font-size:10px;color:var(--shellTxtDim);line-height:1.5}
+.sidefoot b{color:var(--shellTxt)}
+
+/* ---------------- Topbar ---------------- */
+#main{flex:1 1 auto;display:flex;flex-direction:column;min-width:0}
+#topbar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:11px 24px;background:var(--bg);border-bottom:1px solid var(--line)}
+#topbar .crumbs{font-size:11.5px;color:var(--faint)}
+#topbar .crumbs b{color:var(--ink);font-weight:600}
+#topbar .spacer{margin-left:auto}
+.idpill{display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:4px 6px 4px 4px}
+.idpill .av{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700}
+.idpill .tx{font-size:11px;line-height:1.25}
+.idpill .tx b{display:block;font-size:11px}
+.idpill .tx span{color:var(--faint);font-size:9.5px}
+.scopebtn{display:flex;align-items:center;gap:6px;background:var(--tealS);border:1px solid #BEDEE1;color:#075A62;border-radius:20px;padding:5px 11px;font-size:11px;font-weight:600}
+
+/* ---------------- Content ---------------- */
+#content{flex:1 1 auto;overflow-y:auto;padding:22px 26px 40px}
+.screen{max-width:1360px;margin:0 auto;display:none;flex-direction:column;gap:16px}
+.screen.on{display:flex}
+.shd{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.shd h1{font-family:var(--hsans);font-size:21px;font-weight:700;letter-spacing:-.4px;color:var(--navy);margin:0}
+.shd p{font-size:12.5px;color:var(--muted);margin:5px 0 0;max-width:640px;line-height:1.5}
+.stagechip{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:3px 9px;border-radius:3px;white-space:nowrap;flex:0 0 auto}
+.sc-fact{background:var(--tealS);color:#075A62}
+.sc-hyp{background:var(--amberS);color:#8A5810}
+.sc-ill{background:var(--blueS);color:#1F5480}
+
+/* generic building blocks */
+.card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px}
+.card.soft{background:var(--bg2)}
+.card h3{font-family:var(--hsans);font-size:13px;font-weight:700;margin:0 0 7px;color:var(--navy)}
+.card p{margin:0;font-size:11.5px;line-height:1.5;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:11px}
+.label{font-family:var(--hsans);font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--faint)}
+ul.tight{margin:6px 0 0;padding-left:15px;font-size:11.5px;line-height:1.55;color:var(--muted)}
+ul.tight li{margin-bottom:3px}
+ul.tight b{color:var(--ink)}
+
+.kpi{border:1px solid var(--line);border-radius:var(--radius);padding:12px 13px;background:var(--bg)}
+.kpi .n{font-family:var(--hsans);font-size:23px;font-weight:700;color:var(--navy);letter-spacing:-.6px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .n small{font-size:11px;font-weight:700}
+.kpi .l{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.35}
+.kpi.warn{border-left:3px solid var(--amber)}
+.kpi.risk{border-left:3px solid var(--red)}
+.kpi.ok{border-left:3px solid var(--teal)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600}
+.btn:hover{background:var(--navy2)}
+.btn.ghost{background:var(--bg);color:var(--navy);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--bg2)}
+.btn.teal{background:var(--teal)}
+.btn.teal:hover{background:#0A6870}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btnrow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+table.tbl th{font-family:var(--hsans);font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#fff;background:var(--navy);text-align:left;padding:8px 10px}
+table.tbl th:first-child{border-top-left-radius:6px}
+table.tbl th:last-child{border-top-right-radius:6px}
+table.tbl td{padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:middle;line-height:1.4;color:var(--muted)}
+table.tbl td.k{color:var(--ink);font-weight:600}
+table.tbl tr:nth-child(even) td{background:#FAFCFD}
+table.tbl tr.clickable{cursor:pointer}
+table.tbl tr.clickable:hover td{background:var(--tealS)!important}
+
+.pill{display:inline-block;font-family:var(--hsans);font-size:9.5px;font-weight:700;letter-spacing:.4px;padding:2.5px 8px;border-radius:9px;white-space:nowrap}
+.p-low{background:var(--greenS);color:#1F5F42}
+.p-mod{background:var(--blueS);color:#1F5480}
+.p-high{background:var(--amberS);color:#8A5810}
+.p-tr{background:var(--redS);color:#8E2D21}
+.p-neutral{background:var(--bg3);color:var(--muted)}
+
+.conf{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.d-h{background:var(--green)} .d-m{background:var(--amber)} .d-l{background:#B9C5CE} .d-u{background:#fff;border:1.5px dashed #B9C5CE}
+
+.band{background:var(--navy);color:#fff;border-radius:var(--radius);padding:12px 16px;font-size:12.5px;line-height:1.5;display:flex;align-items:center;gap:12px}
+.band .bl{font-family:var(--hsans);font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;opacity:.72;flex:0 0 auto}
+.band b{font-weight:700}
+.callout{border:1px solid var(--line);border-left:3px solid var(--amber);background:var(--amberS);border-radius:6px;padding:11px 14px;font-size:11.5px;line-height:1.55;color:#6E4A12}
+.callout.teal{border-left-color:var(--teal);background:var(--tealS);color:#0A4E55}
+.callout.red{border-left-color:var(--red);background:var(--redS);color:#7E2A20}
+.callout.green{border-left-color:var(--green);background:var(--greenS);color:#1F5F42}
+.callout b{color:inherit}
+
+.strip{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:20px;padding:4px 11px;font-size:10.5px;color:var(--ink);background:var(--bg)}
+.chip.teal{background:var(--tealS);border-color:#BEDEE1;color:#075A62}
+.chip.blue{background:var(--blueS);border-color:#C9DEEF;color:#1F5480}
+.chip.green{background:var(--greenS);border-color:#C3E0D2;color:#1F5F42}
+.chip.red{background:var(--redS);border-color:#EDCCC6;color:#8E2D21}
+.chip.amber{background:var(--amberS);border-color:#EBD6AE;color:#8A5810}
+.chip.click{cursor:pointer;border:1px solid var(--line)}
+.chip.click:hover{background:var(--bg2)}
+
+.rule{height:1px;background:var(--line);border:none;margin:0}
+.stack{display:flex;flex-direction:column;gap:7px}
+
+/* bars */
+.barrow{display:flex;align-items:center;gap:10px;padding:6px 0}
+.barrow .bl2{flex:0 0 150px;font-size:11px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bartrack{flex:1 1 auto;height:16px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative}
+.barfill{height:100%;border-radius:4px}
+.barrow .bv{flex:0 0 96px;text-align:right;font-size:10.5px;color:var(--muted)}
+
+/* drawer */
+#drawerWrap{position:fixed;inset:0;background:rgba(10,20,30,.38);display:none;align-items:stretch;justify-content:flex-end;z-index:40}
+#drawerWrap.open{display:flex}
+#drawer{width:480px;max-width:92vw;background:var(--bg);height:100%;overflow-y:auto;box-shadow:-16px 0 40px rgba(0,0,0,.25);padding:20px 22px 40px;display:flex;flex-direction:column;gap:14px}
+.drawer-close{align-self:flex-end;background:var(--bg2);border:1px solid var(--line);border-radius:6px;width:28px;height:28px;font-size:14px;color:var(--muted)}
+
+/* toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:8px;font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:60;display:flex;align-items:center;gap:9px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* funnel (AHA) */
+.funnel{display:flex;flex-direction:column;align-items:center;gap:2px}
+.fstage{width:100%;max-width:560px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg);cursor:pointer;transition:transform .15s ease}
+.fstage:hover{transform:translateY(-1px)}
+.fstage .fn{font-family:var(--hsans);font-size:26px;font-weight:700;color:var(--navy);letter-spacing:-.8px;line-height:1}
+.fstage .fl{font-size:11px;color:var(--muted);margin-top:3px}
+.farrow{color:#9FB2C0;font-size:14px;line-height:1}
+
+/* gate list */
+.gate{display:flex;align-items:flex-start;gap:11px;border:1px solid var(--line);border-radius:7px;padding:11px 13px}
+.gate .gi{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.gate.pass .gi{background:var(--green)}
+.gate.pending .gi{background:var(--amber)}
+.gate.fail .gi{background:var(--red)}
+.gate .gt{font-family:var(--hsans);font-size:12.5px;font-weight:700;color:var(--navy)}
+.gate .gd{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+.gate .gstatus{margin-left:auto;flex:0 0 auto}
+
+/* slider */
+.slidewrap{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1 1 auto;accent-color:var(--teal)}
+.sliderval{font-family:var(--hsans);font-weight:700;color:var(--navy);font-size:14px;width:52px;text-align:right}
+
+.empty{border:1px dashed var(--line);border-radius:8px;padding:26px;text-align:center;color:var(--faint);font-size:12px}
+.searchbar{display:flex;gap:8px;align-items:center}
+.searchbar input[type=text]{flex:1 1 auto;border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:12px}
+.searchbar select{border:1px solid var(--line);border-radius:6px;padding:8px 9px;font-size:12px;background:var(--bg)}
+
+/* level bars for capability gap */
+.levrow{display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line2)}
+.levrow:last-child{border-bottom:none}
+.levname{font-size:11.5px;font-weight:600;color:var(--ink)}
+.levtrack{position:relative;height:20px;background:var(--bg3);border-radius:4px}
+.levseg{position:absolute;top:0;bottom:0;border-radius:4px}
+.levmark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--navy)}
+.levlabels{display:flex;justify-content:space-between;font-size:9px;color:var(--faint);margin-top:2px}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav id="side">
+    <div class="brand">
+      <div class="k">Project Meridian</div>
+      <div class="n">Decision Console</div>
+      <div class="u">Director of Human Capital view<br>Field Metering &amp; Manual Operations pilot</div>
+    </div>
+    <div class="navwrap" id="navwrap"></div>
+    <div class="sidefoot">Sample data only. All figures are <b>illustrative</b> unless labelled Fact. Built for the Rakamin Product Consultant case study.</div>
+  </nav>
+
+  <div id="main">
+    <div id="topbar">
+      <div class="crumbs" id="crumbs">Executive Dashboard</div>
+      <div class="spacer"></div>
+      <div class="scopebtn">⬤ Field Metering pilot · Day 30 view</div>
+      <div class="idpill"><div class="av">SW</div><div class="tx"><b>Siti Wulandari</b><span>Director of Human Capital</span></div></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div id="drawerWrap"><div id="drawer"></div></div>
+<div id="toast"></div>
+
+<script>
+window.MERIDIAN = { screens: {}, employees: [], families: [] };
+</script>
+<script>
+/* =========================================================================
+   DATA MODEL
+   All records below are synthetic / illustrative. No real employee exists.
+   Identity fields deliberately mismatch across systems (HRIS / LMS / Payroll)
+   to demonstrate the identity-resolution problem stated in the case.
+   ========================================================================= */
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng = mulberry32(20260918);
+function pick(arr){return arr[Math.floor(rng()*arr.length)];}
+function randInt(min,max){return Math.floor(rng()*(max-min+1))+min;}
+
+const FIRST = ["Agus","Budi","Citra","Dewi","Eko","Fitri","Gunawan","Hesti","Indra","Joko","Kartika","Lestari","Made","Nur","Oki","Putri","Rahmat","Siti","Taufik","Umi","Wahyu","Yanto","Zainal","Ari","Bayu","Dian","Endang","Farid","Galih","Hendra","Ika","Jamal"];
+const LAST = ["Santoso","Wijaya","Pratama","Kusuma","Saputra","Hidayat","Nugroho","Setiawan","Ramadhan","Suryani","Halim","Permadi","Utami","Firmansyah","Andayani","Lubis","Simanjuntak","Napitupulu","Handayani","Kurniawan"];
+const REGIONS = ["Regional Unit — Jawa Barat","Regional Unit — Jawa Timur","Regional Unit — Sumatra Utara","Regional Unit — Kalimantan","Regional Unit — Sulawesi","Regional Unit — Jawa Tengah"];
+const TITLES = ["Teknisi Lapangan","Petugas Pencatat Meter","Engineer Madya","Senior Technician II","Petugas Operasional Lapangan","Teknisi Meter Senior"];
+
+const CAP_DEFS = [
+  {id:"safety",       name:"Safety Management",              group:"retain"},
+  {id:"equipment",    name:"Equipment & Asset Knowledge",     group:"retain"},
+  {id:"coord",         name:"Field Coordination",              group:"retain"},
+  {id:"manual_read",  name:"Manual Meter Reading",            group:"decrease"},
+  {id:"manual_data",  name:"Manual Data Capture",             group:"decrease"},
+  {id:"digital_mon",  name:"Digital Field Monitoring",        group:"increase"},
+  {id:"iot_ops",      name:"IoT Operations",                  group:"increase"},
+  {id:"data_interp",  name:"Data Interpretation",             group:"increase"},
+  {id:"anomaly",      name:"Anomaly & Exception Management",  group:"increase"},
+];
+const TARGET_PROFILE = { safety:3, equipment:3, coord:3, digital_mon:3, iot_ops:2, data_interp:2, anomaly:3 };
+const LEVEL_LABEL = {0:"—",1:"L1 Foundational",2:"L2 Working",3:"L3 Proficient",4:"L4 Advanced",5:"L5 Expert"};
+
+const EVIDENCE_SOURCES = {
+  high:["Practical assessment, Oct 2026","Supervised work sample","Validated manager assessment, Sep 2026","Role-specific assessment, Aug 2026"],
+  medium:["Verified project history, 2025–26","Recent training + applied use","Existing competency record (current)"],
+  low:["Self-reported input","Outdated competency record (2021)","Inferred from job title/history"]
+};
+
+function genEmployee(idx){
+  const fn=pick(FIRST), ln=pick(LAST);
+  const name=fn+" "+ln;
+  const tenure=randInt(1,28);
+  const region=pick(REGIONS);
+  const title=pick(TITLES);
+  const empId="EMP-"+randInt(40000,59999);
+  const learnerId="learner_"+randInt(1000,9999);
+  const payrollId="PN-"+randInt(6000,8999);
+  const idMismatch = rng() < 0.62; // illustrates cross-system identity drift
+  const caps={};
+  let evidenced=0, total=CAP_DEFS.length;
+  CAP_DEFS.forEach(c=>{
+    const hasEvidence = rng() < (c.group==="retain" ? 0.75 : c.group==="decrease" ? 0.8 : 0.46);
+    if(!hasEvidence){ caps[c.id]={level:0,confidence:"unknown",source:null,date:null}; return; }
+    evidenced++;
+    const confRoll=rng();
+    const confidence = confRoll<0.4?"high":confRoll<0.75?"medium":"low";
+    let level;
+    if(c.group==="retain") level=randInt(2,4);
+    else if(c.group==="decrease") level=randInt(2,4);
+    else level=confidence==="high"?randInt(1,3):confidence==="medium"?randInt(0,2):randInt(0,1);
+    caps[c.id]={level, confidence, source:pick(EVIDENCE_SOURCES[confidence]), date:confidence==="low"?"2021–2023":"2026"};
+  });
+  const completeness = Math.round((evidenced/total)*100);
+  // gap vs target profile (increase-group + retain-group capabilities that matter for the pathway)
+  let gapSum=0, gapCount=0, knownForGap=0;
+  Object.keys(TARGET_PROFILE).forEach(k=>{
+    const cur = caps[k].level||0;
+    const tgt = TARGET_PROFILE[k];
+    const g = Math.max(0,tgt-cur);
+    gapSum+=g; gapCount++;
+    if(caps[k].confidence!=="unknown") knownForGap++;
+  });
+  const avgGap = gapSum/gapCount;
+  const evidenceCoverage = knownForGap/gapCount;
+  // gate computation
+  const gate1 = true; // future demand exists for this pathway (pilot-confirmed destination)
+  const gate2 = evidenceCoverage >= 0.55; // capability evidence exists
+  const gate3 = avgGap <= 1.9; // gap addressable
+  const gate4 = avgGap <= 2.6; // reskilling feasible at this volume
+  const gate5status = idx % 6 === 0 ? "pass" : idx % 4 === 0 ? "fail" : "pending"; // receiving function confirmation — mostly pending at Day 30
+  let overall;
+  if(!gate2) overall="not-ready"; // insufficient evidence to even consider
+  else if(gate3 && gate4 && gate5status==="pass") overall="redeployable";
+  else if(gate5status==="fail" || avgGap>2.6) overall="manage"; // gap too wide, or receiving function declined
+  else overall="candidate"; // evidenced, gap addressable, awaiting Day 60 confirmation
+
+  return {
+    id:"P"+(1000+idx), name, tenure, region, title, empId, learnerId, payrollId, idMismatch,
+    caps, completeness, avgGap:Math.round(avgGap*10)/10, evidenceCoverage:Math.round(evidenceCoverage*100),
+    gates:{g1:gate1,g2:gate2,g3:gate3,g4:gate4,g5:gate5status}, overall
+  };
+}
+
+for(let i=0;i<32;i++){ MERIDIAN.employees.push(genEmployee(i)); }
+
+MERIDIAN.families = [
+  {id:"metering", name:"Field Metering & Manual Operations", headcount:6000, exposure:"transformational", exposureScore:78, status:"assessed", note:"~70% of work potentially automatable within 18 months"},
+  {id:"substation", name:"Substation Operations", headcount:4100, exposure:"—", exposureScore:null, status:"not-in-scope", note:"Not yet assessed — outside 90-day pilot scope"},
+  {id:"billing", name:"Customer Billing & Collections", headcount:2300, exposure:"—", exposureScore:null, status:"not-in-scope", note:"Not yet assessed — outside 90-day pilot scope"},
+  {id:"grid", name:"Grid Maintenance & Construction", headcount:7800, exposure:"—", exposureScore:null, status:"not-in-scope", note:"Not yet assessed — outside 90-day pilot scope"},
+  {id:"corp", name:"Corporate & Shared Services", headcount:5200, exposure:"—", exposureScore:null, status:"not-in-scope", note:"Not yet assessed — outside 90-day pilot scope"},
+  {id:"other", name:"All other job families (1,795 titles)", headcount:26600, exposure:"—", exposureScore:null, status:"not-in-scope", note:"Full-enterprise mapping is explicitly out of scope for the 90-day pilot"}
+];
+
+MERIDIAN.activities = [
+  {name:"Manual meter reading", exposure:"Transformational", change:"Route-based physical reads replaced by continuous telemetry from smart meters.", implication:"Falls away; telemetry monitoring and exception triage take its place.", confidence:"high"},
+  {name:"Manual data capture", exposure:"Transformational", change:"Handwritten and app-based entry replaced by automated ingestion.", implication:"Falls away; data quality assurance and anomaly flagging rise.", confidence:"high"},
+  {name:"Routine inspection", exposure:"High", change:"Scheduled site visits become condition-triggered, driven by sensor thresholds.", implication:"Volume drops sharply; remaining work shifts to interpreting the trigger before travelling.", confidence:"medium"},
+  {name:"Troubleshooting", exposure:"Moderate", change:"First-line diagnosis moves remote; physical intervention stays for complex faults.", implication:"Splits in two — remote diagnostics (new) and on-site repair (retained, higher complexity).", confidence:"medium"},
+  {name:"Field coordination", exposure:"Moderate", change:"Dispatch becomes data-driven and exception-led rather than schedule-led.", implication:"Remains, reshaped — same accountability, new tools and decision inputs.", confidence:"low"},
+  {name:"Customer interaction", exposure:"Moderate", change:"Routine queries deflect to self-service; disputes and site access remain human.", implication:"Narrows but hardens — fewer, more difficult interactions requiring judgment.", confidence:"low"},
+  {name:"Safety management", exposure:"Low", change:"Regulated accountability for energised assets and public safety is unchanged.", implication:"Fully retained — becomes the anchor capability of the redesigned role.", confidence:"high"}
+];
+
+MERIDIAN.pathways = [
+  {id:"digital-field-ops", name:"Digital Field Operations", level:"L3", desc:"Owns a monitoring territory: triages telemetry alerts, dispatches only confirmed exceptions.", demandStatus:"Illustrative — pending receiving-function confirmation at Day 60"},
+  {id:"iot-field-ops", name:"IoT-enabled Field Operations", level:"L2–L3", desc:"Hybrid role: partial digital monitoring alongside residual physical rounds during transition.", demandStatus:"Illustrative — pending receiving-function confirmation at Day 60"},
+  {id:"digital-support", name:"Digital Field Support", level:"L2", desc:"Supports technicians with device provisioning, connectivity fixes and data quality checks.", demandStatus:"Illustrative — pending receiving-function confirmation at Day 60"},
+  {id:"asset-data-ops", name:"Asset Data Operations", level:"L2–L3", desc:"Maintains asset and telemetry data integrity feeding the exposure and capability models.", demandStatus:"Illustrative — pending receiving-function confirmation at Day 60"}
+];
+
+let STATE = { screen:"dashboard", employeeId:null, redeployRate:0.45, txCostIdx:1, search:"", filterOverall:"all" };
+</script>
+<script>
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function confDot(c){ return '<span class="conf"><span class="dot d-'+(c==="high"?"h":c==="medium"?"m":c==="low"?"l":"u")+'"></span>'+(c==="unknown"?"Unknown":c.charAt(0).toUpperCase()+c.slice(1))+'</span>'; }
+function overallChip(o){
+  const map={redeployable:["Redeployable (validated)","p-low"],candidate:["Redeployment candidate","p-mod"],manage:["Managed pathway","p-high"],"not-ready":["Insufficient evidence","p-tr"]};
+  const [label,cls]=map[o]; return '<span class="pill '+cls+'">'+label+'</span>';
+}
+function gateChip(status){
+  if(status===true||status==="pass") return '<span class="pill p-low">Pass</span>';
+  if(status===false||status==="fail") return '<span class="pill p-tr">Fail</span>';
+  return '<span class="pill p-high">Pending</span>';
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show');
+  clearTimeout(window._toastT); window._toastT=setTimeout(()=>t.classList.remove('show'),3200);
+}
+function esc(s){return (s==null?"":String(s));}
+function initials(name){return name.split(" ").map(p=>p[0]).slice(0,2).join("").toUpperCase();}
+function barChart(rows,opts){
+  opts=opts||{};
+  return rows.map(r=>{
+    const w = r.value==null ? 0 : Math.max(3,r.value);
+    const color = r.color || "var(--teal)";
+    const valTxt = r.valueLabel!==undefined ? r.valueLabel : (r.value==null?"Not assessed":r.value+"%");
+    return '<div class="barrow"><div class="bl2" title="'+esc(r.label)+'">'+esc(r.label)+'</div>'
+      +'<div class="bartrack"><div class="barfill" style="width:'+w+'%;background:'+color+'"></div></div>'
+      +'<div class="bv">'+valTxt+'</div></div>';
+  }).join("");
+}
+
+const NAV = [
+  {id:"dashboard", group:"Overview", label:"Executive Dashboard", ix:"01"},
+  {id:"exposure",  group:"Overview", label:"AI Exposure",         ix:"02"},
+  {id:"metering",  group:"Field Metering pilot", label:"Field Metering",     ix:"03"},
+  {id:"affected",  group:"Field Metering pilot", label:"Affected Work",      ix:"04"},
+  {id:"capability",group:"Field Metering pilot", label:"Capability Impact",  ix:"05"},
+  {id:"roster",    group:"People", label:"Employee Capability", ix:"06"},
+  {id:"gap",       group:"People", label:"Capability Gap",      ix:"07"},
+  {id:"pathway",   group:"People", label:"Redeployment Pathway",ix:"08"},
+  {id:"scenario",  group:"Decision", label:"Reskilling Scenario", ix:"09"},
+  {id:"decision",  group:"Decision", label:"Decision",            ix:"10"}
+];
+const CRUMB = Object.fromEntries(NAV.map(n=>[n.id,n.label]));
+
+function buildNav(){
+  let html=""; let lastGroup=null;
+  NAV.forEach(n=>{
+    if(n.group!==lastGroup){ html+='<div class="navlabel">'+n.group+'</div>'; lastGroup=n.group; }
+    html+='<button class="navitem" data-nav="'+n.id+'"><span class="ix">'+n.ix+'</span><span>'+n.label+'</span><span class="dotstate"></span></button>';
+  });
+  document.getElementById('navwrap').innerHTML=html;
+}
+
+function setActiveNav(){
+  document.querySelectorAll('.navitem').forEach(el=>{
+    el.classList.toggle('active', el.dataset.nav===STATE.screen);
+  });
+  document.getElementById('crumbs').innerHTML = 'Director of Human Capital &nbsp;›&nbsp; <b>'+CRUMB[STATE.screen]+'</b>';
+}
+
+function go(screen, extra){
+  STATE.screen=screen;
+  if(extra) Object.assign(STATE, extra);
+  render();
+  document.getElementById('content').scrollTop=0;
+  setActiveNav();
+  closeDrawer();
+}
+</script>
+<script>
+/* =========================================================================
+   SCREEN 1 — EXECUTIVE DASHBOARD
+   ========================================================================= */
+function screenDashboard(){
+  const totalCaps = MERIDIAN.employees.length*CAP_DEFS.length;
+  const unknownCaps = MERIDIAN.employees.reduce((s,e)=>s+Object.values(e.caps).filter(c=>c.confidence==="unknown").length,0);
+  const blankPct = Math.round(unknownCaps/totalCaps*100);
+  const readyCount = MERIDIAN.employees.filter(e=>e.overall==="redeployable"||e.overall==="candidate").length;
+
+  return `
+  <div class="shd">
+    <div><h1>Executive Dashboard</h1><p>A live view of workforce exposure, evidence quality and redeployment readiness — scoped to the 90-day Field Metering pilot. The remaining 46,000 employees are intentionally out of scope today.</p></div>
+    <span class="stagechip sc-fact">Fact — case figures</span>
+  </div>
+
+  <div class="grid6">
+    <div class="kpi"><div class="n">52,000</div><div class="l">Total workforce, 6 regions + HQ</div></div>
+    <div class="kpi"><div class="n">1,800<small>+</small></div><div class="l">Job titles bound to grade &amp; position</div></div>
+    <div class="kpi warn"><div class="n">${blankPct}<small>%</small></div><div class="l">Skill fields unknown in this sample cohort</div></div>
+    <div class="kpi risk"><div class="n">6,000</div><div class="l">Field Metering — first proof family</div></div>
+    <div class="kpi"><div class="n">Rp 3.5<small>B</small></div><div class="l">Engagement value, 12 months</div></div>
+    <div class="kpi ok"><div class="n">Day 30</div><div class="l">of 90 — foundation &amp; insight gate</div></div>
+  </div>
+
+  <div class="callout red">
+    <b>Flagged this cycle — Field Metering &amp; Manual Operations.</b> ~70% of work in this family is potentially automatable within 18 months, tied to a smart-meter and IoT rollout already procured in another division. ~4,200 roles' worth of work is affected. <button class="btn ghost" style="margin-left:8px;padding:4px 10px;font-size:11px" data-nav="exposure">View exposure map →</button>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>AI exposure by job family</h3>
+      <p style="margin-bottom:8px">Only families entering the 90-day pilot have been scored. Mapping all 1,800+ titles before proving the method is explicitly out of scope.</p>
+      ${barChart(MERIDIAN.families.map(f=>({label:f.name, value:f.exposureScore, color:f.exposureScore>=70?"var(--red)":f.exposureScore>=40?"var(--amber)":"var(--teal)", valueLabel: f.exposureScore==null?'<span style="color:var(--faint)">Not assessed</span>':f.exposureScore+"%"})))}
+    </div>
+    <div class="card">
+      <h3>Evidence completeness — Field Metering sample cohort</h3>
+      <p style="margin-bottom:8px">Per-capability evidence across 32 sampled employees (${CAP_DEFS.length} capabilities each). A blank field means <b>unknown</b>, not <b>absent</b>.</p>
+      <div class="stack" style="margin-top:6px">
+        <div class="barrow"><div class="bl2">High confidence</div><div class="bartrack"><div class="barfill" style="width:${Math.round((1-unknownCaps/totalCaps)*38)}%;background:var(--green)"></div></div><div class="bv">Assessed</div></div>
+        <div class="barrow"><div class="bl2">Medium confidence</div><div class="bartrack"><div class="barfill" style="width:22%;background:var(--amber)"></div></div><div class="bv">Needs check</div></div>
+        <div class="barrow"><div class="bl2">Unknown</div><div class="bartrack"><div class="barfill" style="width:${blankPct}%;background:#B9C5CE"></div></div><div class="bv">${blankPct}% of fields</div></div>
+      </div>
+      <div class="callout teal" style="margin-top:10px">Unknown fields trigger an assessment queue — never a capability conclusion. See <b>Employee Capability →</b></div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card soft"><h3>Redeployment readiness so far</h3><p><b style="color:var(--navy);font-size:20px;font-family:var(--hsans)">${readyCount} of 32</b><br>sampled employees are candidates or validated for redeployment under current evidence. The rest need more assessment or a wider search.</p><button class="btn ghost" style="margin-top:9px" data-nav="roster">Open roster →</button></div>
+    <div class="card soft"><h3>90-day milestone</h3><p>Day 30 — foundation and first insight. Decision at this gate: <b>where is disruption concentrated, and how confident are we?</b></p><button class="btn ghost" style="margin-top:9px" data-nav="decision">View decision pack →</button></div>
+    <div class="card soft"><h3>Constraints holding</h3><ul class="tight"><li>No SAP / Oracle replacement</li><li>No mass layoffs — Ministry position</li><li>Payroll data not accessed</li><li>No contract or grade changes</li></ul></div>
+  </div>
+  `;
+}
+
+/* =========================================================================
+   SCREEN 2 — AI EXPOSURE (job family list)
+   ========================================================================= */
+function screenExposure(){
+  return `
+  <div class="shd">
+    <div><h1>AI Exposure — by job family</h1><p>Exposure is assessed at the <b>work-activity level</b>, not the job title, and only where the pilot has reached. Everything else is named and marked, not silently omitted.</p></div>
+    <span class="stagechip sc-hyp">Hypothesis — activity-level scoring</span>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Job family</th><th style="width:110px">Headcount</th><th style="width:140px">Exposure</th><th style="width:120px">Status</th><th>Note</th><th style="width:40px"></th></tr></thead>
+    <tbody>
+      ${MERIDIAN.families.map(f=>`
+        <tr class="${f.id==='metering'?'clickable':''}" ${f.id==='metering'?'data-nav="metering"':''}>
+          <td class="k">${f.name}</td>
+          <td>${f.headcount.toLocaleString()}</td>
+          <td>${f.exposureScore==null?'<span class="pill p-neutral">Not assessed</span>':'<span class="pill '+(f.exposureScore>=70?'p-tr':'p-high')+'">'+f.exposureScore+'% · '+f.exposure+'</span>'}</td>
+          <td>${f.status==='assessed'?'<span class="pill p-low">In pilot</span>':'<span class="pill p-neutral">Out of scope</span>'}</td>
+          <td style="font-size:11px">${f.note}</td>
+          <td>${f.id==='metering'?'<span style="color:var(--teal)">→</span>':''}</td>
+        </tr>`).join("")}
+    </tbody>
+  </table>
+  <div class="callout">
+    <b>Why only one family is scored today.</b> Assessing all 1,800+ titles in 90 days would trade depth for coverage and produce numbers no one could stand behind. Field Metering was chosen because its disruption is already funded and dated — not hypothetical — and because it is the highest-stakes case for the union. Proving the method here is what makes scaling to the rest a resourcing decision rather than a methodology debate.
+  </div>
+  <div class="btnrow"><button class="btn teal" data-nav="metering">Open Field Metering exposure map →</button></div>
+  `;
+}
+</script>
+<script>
+/* =========================================================================
+   SCREEN 3 — FIELD METERING ACTIVITY MAP
+   ========================================================================= */
+function screenMetering(){
+  return `
+  <div class="shd">
+    <div><h1>Field Metering &amp; Manual Operations — exposure map</h1><p>Seven work activities that make up the family, scored against the smart-meter and IoT rollout already procured elsewhere in the enterprise. Click a row for the reasoning behind it.</p></div>
+    <span class="stagechip sc-hyp">Illustrative hypothesis</span>
+  </div>
+  <div class="grid4">
+    <div class="kpi risk"><div class="n">~6,000</div><div class="l">Employees in this family</div></div>
+    <div class="kpi risk"><div class="n">~70<small>%</small></div><div class="l">Of work potentially automatable</div></div>
+    <div class="kpi risk"><div class="n">18<small> mo</small></div><div class="l">Rollout horizon</div></div>
+    <div class="kpi"><div class="n">7</div><div class="l">Work activities decomposed</div></div>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Work activity</th><th style="width:150px">Exposure</th><th style="width:120px">Confidence</th><th style="width:34px"></th></tr></thead>
+    <tbody>
+      ${MERIDIAN.activities.map((a,i)=>`
+        <tr class="clickable" data-drawer="activity" data-idx="${i}">
+          <td class="k">${a.name}</td>
+          <td><span class="pill ${a.exposure==='Transformational'?'p-tr':a.exposure==='High'?'p-high':a.exposure==='Moderate'?'p-mod':'p-low'}">${a.exposure}</span></td>
+          <td>${confDot(a.confidence)}</td>
+          <td style="color:var(--teal)">→</td>
+        </tr>`).join("")}
+    </tbody>
+  </table>
+  <div class="callout teal">
+    <b>Illustrative hypothesis — validate against the actual smart-meter / IoT implementation roadmap.</b> The ~70% automatable figure is a case fact; how it distributes across these seven activities is our modelled decomposition, built from standard field-service work-activity structures. Rows marked Low confidence are the first target for Day 30–60 validation.
+  </div>
+  <div class="btnrow"><button class="btn teal" data-nav="affected">See what this means for headcount →</button></div>
+  `;
+}
+
+/* =========================================================================
+   SCREEN 4 — AFFECTED WORK (the AHA moment)
+   ========================================================================= */
+let AFFECTED_EXPANDED = false;
+function screenAffected(){
+  return `
+  <div class="shd">
+    <div><h1>The 4,200 roles' worth of affected work</h1><p>This is the number the union has already heard a rumour about. Read carefully: it is a volume of labour, not a headcount.</p></div>
+    <span class="stagechip sc-fact">Fact + Hypothesis</span>
+  </div>
+
+  <div class="funnel">
+    <div class="fstage" data-action="affected-expand"><div class="fn">~6,000</div><div class="fl">employees in Field Metering &amp; Manual Operations</div></div>
+    <div class="farrow">↓</div>
+    <div class="fstage" style="border-color:#EBD6AE;background:var(--amberS)" data-action="affected-expand"><div class="fn" style="color:var(--amber)">~70%</div><div class="fl" style="color:#7A5214">of the <b>work</b> in that family potentially automatable within 18 months</div></div>
+    <div class="farrow">↓</div>
+    <div class="fstage" style="border-color:#EDCCC6;background:var(--redS)" data-action="affected-expand"><div class="fn" style="color:var(--red)">~4,200</div><div class="fl" style="color:#8E2D21"><b>roles' worth of work</b> affected — click to see what happens to it</div></div>
+  </div>
+
+  <div id="affectedDetail">${AFFECTED_EXPANDED ? affectedDetailHTML() : ''}</div>
+
+  ${AFFECTED_EXPANDED ? '' : '<div style="text-align:center"><button class="btn ghost" data-action="affected-expand">Expand — what does 4,200 roles&#39; worth of work actually mean? ↓</button></div>'}
+  `;
+}
+function affectedDetailHTML(){
+  return `
+  <div class="callout red">
+    <b>What this number is not.</b> It is not 4,200 employees who lose their jobs. It is not a redundancy list. The affected work is spread thinly across many people — most Field Metering employees lose <i>part</i> of their current activity set, not all of it. Reading it as a headcount is the error already circulating among the union, and it is the error this pilot exists to correct.
+  </div>
+  <div class="grid3">
+    <div class="card" style="border-top:3px solid var(--red)"><h3>Decreases ↓</h3><ul class="tight"><li>Manual meter reading</li><li>Manual data entry</li><li>Routine physical verification</li><li>Schedule-driven site visits</li></ul></div>
+    <div class="card" style="border-top:3px solid var(--blue)"><h3>Remains →</h3><ul class="tight"><li>Safety management</li><li>Equipment &amp; asset knowledge</li><li>Exception handling</li><li>Field coordination</li></ul></div>
+    <div class="card" style="border-top:3px solid var(--green)"><h3>Increases ↑</h3><ul class="tight"><li>Digital field monitoring</li><li>IoT operations</li><li>Data interpretation</li><li>Anomaly management</li></ul></div>
+  </div>
+  <div class="callout"><b>The honest caveat.</b> These three columns are not the same size, and "increases" will not absorb "decreases" one-for-one. Some net reduction in required labour is the point of the investment. The open question — how much of the gap is genuinely closable — is answered with evidence, not optimism, starting on the next screens.</div>
+  <div class="band"><span class="bl">Reframe</span><span>The question moves from <b>"who is redundant?"</b> to <b>"which capabilities can move into the work that is arriving?"</b></span></div>
+  <div class="btnrow"><button class="btn teal" data-nav="capability">See the capability shift in detail →</button><button class="btn ghost" data-nav="roster">Go to affected employees →</button></div>
+  `;
+}
+</script>
+<script>
+/* =========================================================================
+   SCREEN 5 — CAPABILITY IMPACT (before/after)
+   ========================================================================= */
+function screenCapability(){
+  const rows = [
+    {cap:"Manual data capture", before:"L3 core", after:"Not required", dir:"Falls away", cls:"p-tr", why:"Automated ingestion replaces the activity entirely."},
+    {cap:"Routine physical checks", before:"L3 core", after:"L1 residual", dir:"Decreases", cls:"p-high", why:"Condition-triggered rather than scheduled."},
+    {cap:"Safety management", before:"L3", after:"L3", dir:"Maintains", cls:"p-low", why:"Regulated accountability is unchanged by telemetry."},
+    {cap:"Equipment knowledge", before:"L3", after:"L3", dir:"Maintains", cls:"p-low", why:"Still the basis of every physical intervention."},
+    {cap:"Operational accountability", before:"L2", after:"L3", dir:"Rises", cls:"p-mod", why:"Fewer, higher-stakes decisions per person."},
+    {cap:"Digital monitoring & IoT ops", before:"—", after:"L2–L3", dir:"New", cls:"p-mod", why:"Becomes the primary daily activity."},
+    {cap:"Data interpretation", before:"—", after:"L2", dir:"New", cls:"p-mod", why:"Deciding whether a flag is real before acting on it."},
+    {cap:"Anomaly & exception management", before:"L1 implicit", after:"L3", dir:"Rises sharply", cls:"p-mod", why:"The work becomes exception handling by definition."}
+  ];
+  return `
+  <div class="shd">
+    <div><h1>Capability impact — one business process, before and after</h1><p>Meter-to-resolution, reshaped. This is the capability profile the redeployment engine on the next screens is matching people against.</p></div>
+    <span class="stagechip sc-hyp">Hypothesis — target state</span>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Before — schedule-driven, on-site, manual</h3><p>Monthly route scheduled → technician travels to site → reads meter by hand → records and re-keys data → anomaly found next cycle → second visit to resolve. <b>Effort scales with number of meters.</b></p></div>
+    <div class="card" style="border-color:#BEDEE1;background:#FBFEFE"><h3 style="color:#075A62">After — exception-driven, remote-first, digital</h3><p>Telemetry streams in → system flags anomaly → operator triages remotely → most resolved without travel → complex cases dispatched → field fix, first-visit resolution. <b>Effort scales with number of exceptions.</b></p></div>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Capability</th><th style="width:110px">Before</th><th style="width:110px">After</th><th style="width:130px">Direction</th><th>Why</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td class="k">${r.cap}</td><td>${r.before}</td><td>${r.after}</td><td><span class="pill ${r.cls}">${r.dir}</span></td><td>${r.why}</td></tr>`).join("")}</tbody>
+  </table>
+  <div class="btnrow"><button class="btn teal" data-nav="roster">See who holds these capabilities today →</button></div>
+  `;
+}
+
+/* =========================================================================
+   SCREEN 6 — EMPLOYEE CAPABILITY ROSTER
+   ========================================================================= */
+function screenRoster(){
+  const q = STATE.search.toLowerCase();
+  const filt = STATE.filterOverall;
+  const list = MERIDIAN.employees.filter(e=>{
+    const matchQ = !q || e.name.toLowerCase().includes(q) || e.empId.toLowerCase().includes(q) || e.region.toLowerCase().includes(q);
+    const matchF = filt==="all" || e.overall===filt;
+    return matchQ && matchF;
+  });
+  return `
+  <div class="shd">
+    <div><h1>Employee Capability — Field Metering sample cohort</h1><p>32 sampled records. Identity fields are shown as they exist across systems today — resolving this mismatch was the first task of the data foundation.</p></div>
+    <span class="stagechip sc-ill">Illustrative sample data</span>
+  </div>
+  <div class="searchbar">
+    <input type="text" id="rosterSearch" placeholder="Search name, employee ID or region…" value="${esc(STATE.search)}">
+    <select id="rosterFilter">
+      <option value="all" ${filt==='all'?'selected':''}>All statuses</option>
+      <option value="redeployable" ${filt==='redeployable'?'selected':''}>Redeployable (validated)</option>
+      <option value="candidate" ${filt==='candidate'?'selected':''}>Redeployment candidate</option>
+      <option value="manage" ${filt==='manage'?'selected':''}>Managed pathway</option>
+      <option value="not-ready" ${filt==='not-ready'?'selected':''}>Insufficient evidence</option>
+    </select>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Name</th><th style="width:200px">System IDs</th><th style="width:150px">Region</th><th style="width:80px">Tenure</th><th style="width:130px">Evidence coverage</th><th style="width:170px">Status</th><th style="width:34px"></th></tr></thead>
+    <tbody>
+      ${list.length===0?`<tr><td colspan="7"><div class="empty">No records match this search.</div></td></tr>`:list.map(e=>`
+        <tr class="clickable" data-nav="gap" data-emp="${e.id}">
+          <td class="k">${e.name}<div style="font-size:10px;color:var(--faint);font-weight:400">${e.title}</div></td>
+          <td style="font-size:10px;line-height:1.6">HRIS ${e.empId}<br>LMS ${e.learnerId}<br>Payroll ${e.payrollId} ${e.idMismatch?'<span class="pill p-high" style="margin-left:3px">ID drift</span>':''}</td>
+          <td>${e.region.replace('Regional Unit — ','')}</td>
+          <td>${e.tenure} yrs</td>
+          <td>${e.completeness}%</td>
+          <td>${overallChip(e.overall)}</td>
+          <td style="color:var(--teal)">→</td>
+        </tr>`).join("")}
+    </tbody>
+  </table>
+  <div class="note" style="font-size:10.5px;color:var(--faint)">Showing ${list.length} of ${MERIDIAN.employees.length} sampled records. Click any row to open the capability gap and redeployment pathway for that person.</div>
+  `;
+}
+</script>
+<script>
+/* =========================================================================
+   SCREEN 7 — CAPABILITY GAP (portfolio + gap analysis for one employee)
+   ========================================================================= */
+function pickEmployee(){
+  return MERIDIAN.employees.find(e=>e.id===STATE.employeeId) || MERIDIAN.employees[0];
+}
+function screenGap(){
+  if(!STATE.employeeId) STATE.employeeId = MERIDIAN.employees[0].id;
+  const e = pickEmployee();
+  const portfolioRows = CAP_DEFS.map(c=>{
+    const rec = e.caps[c.id];
+    return `<tr>
+      <td class="k">${c.name}</td>
+      <td>${LEVEL_LABEL[rec.level]||'—'}</td>
+      <td>${confDot(rec.confidence)}</td>
+      <td style="font-size:10.5px">${rec.source||'<span style="color:var(--faint)">No record — assessment needed</span>'}</td>
+    </tr>`;
+  }).join("");
+
+  const gapRows = Object.keys(TARGET_PROFILE).map(k=>{
+    const def = CAP_DEFS.find(c=>c.id===k);
+    const cur = e.caps[k].level||0, tgt = TARGET_PROFILE[k];
+    const curPct = cur/5*100, tgtPct = tgt/5*100;
+    const gap = Math.max(0,tgt-cur);
+    const barColor = gap===0?"var(--green)":gap<=1?"var(--amber)":"var(--red)";
+    return `<div class="levrow">
+      <div class="levname">${def.name}${e.caps[k].confidence==='unknown'?' <span class="pill p-neutral" style="margin-left:3px">unknown</span>':''}</div>
+      <div>
+        <div class="levtrack">
+          <div class="levseg" style="left:0;width:${curPct}%;background:${e.caps[k].confidence==='unknown'?'#E4E9EC':barColor}"></div>
+          <div class="levmark" style="left:${tgtPct}%"></div>
+        </div>
+        <div class="levlabels"><span>Current: ${LEVEL_LABEL[cur]}</span><span>Target: ${LEVEL_LABEL[tgt]} · gap ${gap}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `
+  <div class="shd">
+    <div>
+      <h1>Capability Gap — ${e.name}</h1>
+      <p>${e.title} · ${e.region} · ${e.tenure} years' tenure · Target destination profile: <b>Digital Field Operations, L3</b></p>
+    </div>
+    <span class="stagechip sc-ill">Illustrative record</span>
+  </div>
+
+  <div class="searchbar" style="max-width:420px">
+    <select id="empPicker" style="flex:1 1 auto">
+      ${MERIDIAN.employees.map(p=>`<option value="${p.id}" ${p.id===e.id?'selected':''}>${p.name} — ${p.region.replace('Regional Unit — ','')}</option>`).join("")}
+    </select>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Full capability portfolio</h3>
+      <p style="margin-bottom:8px">Every level shown traces to an evidence record on the right. Blank confidence means the field is unknown — never zero capability.</p>
+      <table class="tbl"><thead><tr><th>Capability</th><th style="width:120px">Level</th><th style="width:100px">Confidence</th><th>Evidence source</th></tr></thead><tbody>${portfolioRows}</tbody></table>
+    </div>
+    <div class="card">
+      <h3>Gap to target profile — Digital Field Operations L3</h3>
+      <p style="margin-bottom:6px">Navy tick marks the target level. Grey bars mean the current level is unknown, not zero.</p>
+      <div>${gapRows}</div>
+      <div class="callout" style="margin-top:11px"><b>Average gap: ${e.avgGap} levels</b> across the target profile, with evidence covering ${e.evidenceCoverage}% of the relevant capabilities. ${e.evidenceCoverage<55?'This is below the threshold for a confident placement — more assessment is needed before this person enters a redeployment recommendation.':'This is sufficient evidence to proceed to the redeployment pathway check.'}</div>
+    </div>
+  </div>
+  <div class="btnrow"><button class="btn teal" data-nav="pathway" data-emp="${e.id}">Run redeployment pathway for ${e.name.split(' ')[0]} →</button></div>
+  `;
+}
+
+/* =========================================================================
+   SCREEN 8 — REDEPLOYMENT PATHWAY
+   ========================================================================= */
+function screenPathway(){
+  const e = pickEmployee();
+  const g = e.gates;
+  const gates = [
+    {n:1, title:"Future demand exists", status:g.g1, desc:"Digital Field Operations is a candidate destination created by the same rollout displacing this activity. Demand is illustrative until the receiving function confirms it."},
+    {n:2, title:"Current capability evidence exists", status:g.g2, desc:`${e.evidenceCoverage}% of the target profile is evidenced above self-report for this person. ${g.g2?'Meets the threshold to proceed.':'Below the 55% threshold — more assessment required before this gate can pass.'}`},
+    {n:3, title:"Capability gap is addressable", status:g.g3, desc:`Average gap of ${e.avgGap} levels across the target profile. ${g.g3?'Within the range reskilling can close inside the 18-month rollout window.':'Wider than reskilling can reliably close in the available time.'}`},
+    {n:4, title:"Reskilling is feasible", status:g.g4, desc:g.g4?"Gap size and available programme capacity make a targeted reskilling plan realistic.":"Gap size exceeds what a single reskilling cycle can realistically close for this person."},
+    {n:5, title:"Receiving function confirms demand", status:g.g5, desc: g.g5==='pass' ? "Confirmed by the Digital Field Operations line lead — placement can proceed to validation." : g.g5==='fail' ? "The receiving function has not confirmed capacity for this placement at this time." : "Not yet reviewed — scheduled for Day 60 stakeholder validation, alongside the union and Ministry sessions."}
+  ];
+  const gateEls = gates.map(gt=>`
+    <div class="gate ${gt.status===true||gt.status==='pass'?'pass':gt.status===false||gt.status==='fail'?'fail':'pending'}">
+      <div class="gi">${gt.status===true||gt.status==='pass'?'✓':gt.status===false||gt.status==='fail'?'✕':gt.n}</div>
+      <div><div class="gt">Gate ${gt.n} — ${gt.title}</div><div class="gd">${gt.desc}</div></div>
+      <div class="gstatus">${gateChip(gt.status)}</div>
+    </div>`).join("");
+
+  const destination = MERIDIAN.pathways[0];
+  const outcomeBlock = e.overall==="redeployable" ? `
+      <div class="callout green"><b>Validated redeployment candidate.</b> All five gates pass. ${e.name.split(' ')[0]} is recommended for placement into <b>${destination.name}, ${destination.level}</b>, pending final sign-off at the Day 60 stakeholder review.</div>`
+    : e.overall==="candidate" ? `
+      <div class="callout"><b>Redeployment candidate — not yet validated.</b> This person is a plausible fit for <b>${destination.name}</b>, but at least one gate is pending or marginal. Recommended action: prioritise for assessment or receiving-function confirmation before Day 60.</div>`
+    : e.overall==="manage" ? `
+      <div class="callout red"><b>Redeployment unlikely on current evidence.</b> The gap or confirmation gate is not passable within this rollout window. This case moves to the <b>managed workforce pathway</b> below rather than an automatic conclusion of surplus.</div>`
+    : `
+      <div class="callout red"><b>Insufficient evidence to assess.</b> Too many capability fields are unknown to responsibly run this person through the redeployment engine. Recommended action: schedule a practical assessment before any workforce decision is considered.</div>`;
+
+  return `
+  <div class="shd">
+    <div><h1>Redeployment Pathway — ${e.name}</h1><p>Five gates, all five required. Any gate that fails sends the case back for more evidence or a wider search — it does not, by itself, conclude redundancy.</p></div>
+    <span class="stagechip sc-ill">Illustrative pathway</span>
+  </div>
+  <div class="stack">${gateEls}</div>
+  ${outcomeBlock}
+  <div class="grid2">
+    <div class="card"><h3>Candidate destination</h3><p><b>${destination.name}, ${destination.level}</b><br>${destination.desc}</p><p style="margin-top:6px;color:var(--amber)"><b>${destination.demandStatus}</b></p></div>
+    <div class="card"><h3>If redeployment does not work</h3><ul class="tight"><li>Widen the search — cross-family and cross-region matching on the same evidence</li><li>Sequence with natural attrition over the 18-month horizon</li><li>Phase the transition — partial redesign before full transfer</li><li>Escalate to a governed policy decision with the union and Director, evidence attached</li></ul></div>
+  </div>
+  <div class="btnrow"><button class="btn ghost" data-nav="roster">← Back to roster</button><button class="btn teal" data-nav="scenario">See cohort-level economics →</button></div>
+  `;
+}
+</script>
+<script>
+/* =========================================================================
+   SCREEN 9 — RESKILLING SCENARIO (economics, no fabricated ROI)
+   ========================================================================= */
+function screenScenario(){
+  const rate = STATE.redeployRate;
+  const affected = 4200;
+  const redeployed = Math.round(affected*rate);
+  const managed = affected-redeployed;
+  const txIdx = STATE.txCostIdx; // 0 low,1 mid,2 high — relative, not rupiah
+  const txLabel = ["Lower","Moderate","Higher"][txIdx];
+  const scenarioName = rate<0.35?"Conservative":rate<0.6?"Base":"Stretch";
+  const scenarioColor = rate<0.35?"var(--muted)":rate<0.6?"var(--teal)":"var(--green)";
+
+  return `
+  <div class="shd">
+    <div><h1>Reskilling Scenario — cohort economics</h1><p>Payroll data is off-limits under Ministry governance, so no rupiah return is computed here. Move the assumption below and watch which decisions change — that is what a Board can act on before Day 90.</p></div>
+    <span class="stagechip sc-hyp">Scenario model — not a forecast</span>
+  </div>
+
+  <div class="card">
+    <h3>Assumption: share of affected work that converts to redeployment</h3>
+    <div class="slidewrap">
+      <span style="font-size:11px;color:var(--faint)">10%</span>
+      <input type="range" id="rateSlider" min="10" max="90" step="5" value="${Math.round(rate*100)}">
+      <span style="font-size:11px;color:var(--faint)">90%</span>
+      <span class="sliderval">${Math.round(rate*100)}%</span>
+    </div>
+    <div style="margin-top:6px"><span class="pill" style="background:${scenarioColor};color:#fff">${scenarioName} scenario</span></div>
+  </div>
+
+  <div class="grid3">
+    <div class="kpi"><div class="n">${affected.toLocaleString()}</div><div class="l">Roles' worth of affected work (fact)</div></div>
+    <div class="kpi ok"><div class="n">${redeployed.toLocaleString()}</div><div class="l">Converts to redeployment at this rate</div></div>
+    <div class="kpi warn"><div class="n">${managed.toLocaleString()}</div><div class="l">Enters the managed workforce pathway</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Transition cost assumption</h3>
+    <div class="strip">
+      <button class="chip click ${txIdx===0?'teal':''}" data-action="tx" data-v="0">Lower — short reskilling cycles</button>
+      <button class="chip click ${txIdx===1?'teal':''}" data-action="tx" data-v="1">Moderate — standard programme</button>
+      <button class="chip click ${txIdx===2?'teal':''}" data-action="tx" data-v="2">Higher — extended / complex gaps</button>
+    </div>
+    <p style="margin-top:9px">Transition cost is expressed relatively, not in rupiah, because the underlying salary and training-spend baselines are not available in this pilot. ${txLabel} cost narrows the range of the value scenario without asserting a number.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card soft">
+      <h3>What the Board decides at this rate</h3>
+      <ul class="tight">
+        ${rate<0.35?'<li>Scale slowly; lean on attrition and phased redesign for most of the affected work</li><li>Reskilling investment stays narrow and targeted</li>':rate<0.6?'<li>Proceed to the next 2 job families after Day 90</li><li>Reskilling programme sized for a defined, bounded cohort</li>':'<li>Scale enterprise-wide with a standing capability function</li><li>Reskilling becomes a continuous operating-line activity, not a project</li>'}
+        <li>${managed.toLocaleString()} roles' worth of work still needs a managed pathway regardless of scenario — this number does not go to zero</li>
+      </ul>
+    </div>
+    <div class="card soft">
+      <h3>Value drivers (qualitative, not modelled)</h3>
+      <div class="strip">
+        <span class="chip">Faster workforce decisions</span><span class="chip">Better-targeted reskilling spend</span><span class="chip">Productivity &amp; capacity</span><span class="chip">Redeployment value</span><span class="chip">Knowledge retention</span><span class="chip">Reduced unmanaged risk</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout red"><b>No ROI figure is asserted on this screen or anywhere in this prototype.</b> The rate above is an assumption to be tested — through the Day 60 pilot cohort — not a forecast. The comparison that matters is managed redeployment versus unmanaged disruption; a mass-layoff comparison was never available given the Ministry's position.</div>
+  <div class="btnrow"><button class="btn teal" data-nav="decision">Go to Board decision pack →</button></div>
+  `;
+}
+
+/* =========================================================================
+   SCREEN 10 — DECISION
+   ========================================================================= */
+let DECISION_APPROVED = false;
+function screenDecision(){
+  return `
+  <div class="shd">
+    <div><h1>Board Decision Pack — Day 90 gate</h1><p>What the Director takes to the Board and Ministry: a recommendation, its evidence, and the one thing we are least confident about, stated plainly.</p></div>
+    <span class="stagechip sc-fact">Decision</span>
+  </div>
+
+  <div class="band"><span class="bl">Recommendation</span><span>Approve scaling the <b>AI Exposure &amp; Redeployment</b> mechanism to the next 2 job families, on the evidence produced by the Field Metering pilot.</span></div>
+
+  <div class="grid3">
+    <div class="card"><h3>What was proven</h3><ul class="tight"><li>Activity-level exposure map for Field Metering, with confidence stated</li><li>A working evidence and confidence model, tested against real data gaps</li><li>A five-gate redeployment engine, run against ${MERIDIAN.employees.length} sampled employees</li></ul></div>
+    <div class="card"><h3>What remains open</h3><ul class="tight"><li>Receiving-function demand confirmation — scheduled Day 60</li><li>Union and Ministry sign-off on the evidence standard</li><li>A completed reskilling cohort, run to validation</li></ul></div>
+    <div class="card" style="border-left:3px solid var(--amber);background:#FEFBF5">
+      <h3 style="color:#8A5810">Least-confident decision</h3>
+      <p>How much of the affected Field Metering work can genuinely convert into redeployment — and therefore how strong a number the Director can put in front of the Board.</p>
+      <p style="margin-top:6px;font-size:11px"><b>Would validate with:</b> written demand confirmation, a completed assessment cohort, one reskilling cohort run to completion.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Decision requested at this gate</h3>
+    <p style="margin-bottom:10px">Approve the 90-day proof to continue into Day 60 stakeholder validation, or hold pending further evidence.</p>
+    <div class="btnrow">
+      <button class="btn teal" id="approveBtn" ${DECISION_APPROVED?'disabled':''}>${DECISION_APPROVED?'✓ Approved for Day 60':'Approve — proceed to Day 60 validation'}</button>
+      <button class="btn ghost" data-action="hold">Hold — request more evidence first</button>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card soft"><h3>Constraints honoured throughout</h3><ul class="tight"><li>No SAP or Oracle replacement</li><li>No contract or grade changes</li><li>No mass layoffs proposed or implied</li><li>Payroll data never accessed</li></ul></div>
+    <div class="card soft"><h3>Repeatability</h3><p>The evidence hierarchy, gate logic and levelling rubric used here are job-family-agnostic. Only the capability content is specific to Field Metering — which is what makes this a reusable method rather than a one-off build.</p></div>
+  </div>
+  `;
+}
+</script>
+<script>
+/* =========================================================================
+   DRAWER (activity detail)
+   ========================================================================= */
+function openDrawer(html){
+  document.getElementById('drawer').innerHTML = '<button class="drawer-close" data-action="close-drawer">✕</button>'+html;
+  document.getElementById('drawerWrap').classList.add('open');
+}
+function closeDrawer(){ document.getElementById('drawerWrap').classList.remove('open'); }
+
+function drawerActivity(idx){
+  const a = MERIDIAN.activities[idx];
+  return `
+    <span class="stagechip sc-hyp" style="align-self:flex-start">Illustrative hypothesis</span>
+    <h2 style="font-size:18px;color:var(--navy);margin:2px 0 0">${a.name}</h2>
+    <div><span class="pill ${a.exposure==='Transformational'?'p-tr':a.exposure==='High'?'p-high':a.exposure==='Moderate'?'p-mod':'p-low'}">${a.exposure} exposure</span> &nbsp; ${confDot(a.confidence)}</div>
+    <div class="card soft"><h3>What changes</h3><p>${a.change}</p></div>
+    <div class="card soft"><h3>Capability implication</h3><p>${a.implication}</p></div>
+    <div class="callout teal">Validate against the actual smart-meter / IoT implementation roadmap before this rating is treated as final. Confidence reflects how directly this activity is tied to the procured technology.</div>
+  `;
+}
+
+/* =========================================================================
+   ROUTER + RENDER
+   ========================================================================= */
+const RENDER = {
+  dashboard: screenDashboard, exposure: screenExposure, metering: screenMetering,
+  affected: screenAffected, capability: screenCapability, roster: screenRoster,
+  gap: screenGap, pathway: screenPathway, scenario: screenScenario, decision: screenDecision
+};
+function render(){
+  document.getElementById('content').innerHTML = '<div class="screen on">'+RENDER[STATE.screen]()+'</div>';
+  wireScreenExtras();
+}
+function wireScreenExtras(){
+  const rs=document.getElementById('rosterSearch');
+  if(rs){ rs.addEventListener('input',e=>{STATE.search=e.target.value; render();}); rs.focus(); rs.setSelectionRange(rs.value.length,rs.value.length); }
+  const rf=document.getElementById('rosterFilter');
+  if(rf){ rf.addEventListener('change',e=>{STATE.filterOverall=e.target.value; render();}); }
+  const ep=document.getElementById('empPicker');
+  if(ep){ ep.addEventListener('change',e=>{STATE.employeeId=e.target.value; render();}); }
+  const rSlider=document.getElementById('rateSlider');
+  if(rSlider){ rSlider.addEventListener('input',e=>{STATE.redeployRate=(+e.target.value)/100; render();}); }
+}
+
+/* =========================================================================
+   GLOBAL EVENT DELEGATION
+   ========================================================================= */
+document.addEventListener('click', function(ev){
+  const navBtn = ev.target.closest('[data-nav]');
+  if(navBtn){
+    const extra={};
+    if(navBtn.dataset.emp) extra.employeeId = navBtn.dataset.emp;
+    go(navBtn.dataset.nav, extra);
+    return;
+  }
+  const drawerBtn = ev.target.closest('[data-drawer]');
+  if(drawerBtn){
+    if(drawerBtn.dataset.drawer==='activity') openDrawer(drawerActivity(+drawerBtn.dataset.idx));
+    return;
+  }
+  const closeBtn = ev.target.closest('[data-action="close-drawer"]');
+  if(closeBtn){ closeDrawer(); return; }
+  if(ev.target.closest('#drawerWrap') && !ev.target.closest('#drawer')){ closeDrawer(); return; }
+
+  const affExpand = ev.target.closest('[data-action="affected-expand"]');
+  if(affExpand){ AFFECTED_EXPANDED = true; render(); return; }
+
+  const txBtn = ev.target.closest('[data-action="tx"]');
+  if(txBtn){ STATE.txCostIdx = +txBtn.dataset.v; render(); return; }
+
+  const approveBtn = ev.target.closest('#approveBtn');
+  if(approveBtn && !approveBtn.disabled){ DECISION_APPROVED=true; render(); toast('✓ Decision logged — Field Metering pilot approved to proceed to Day 60 stakeholder validation.'); return; }
+
+  const holdBtn = ev.target.closest('[data-action="hold"]');
+  if(holdBtn){ toast('Noted — hold recorded. No pathway advances until additional evidence is supplied.'); return; }
+
+  const sideNav = ev.target.closest('.navitem');
+  if(sideNav){ go(sideNav.dataset.nav); return; }
+});
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+buildNav();
+render();
+setActiveNav();
+</script>
+</body>
+</html>
